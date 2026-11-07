@@ -1,0 +1,19 @@
+# Build output
+target/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+
+# Environment files (never commit secrets or keys)
+.env
+.env.*
+!.env.example

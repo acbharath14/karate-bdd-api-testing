@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.acbharath14</groupId>
+  <artifactId>karate-scaffold</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <name>Karate API Testing Showcase</name>
+  <description>Karate BDD API test automation showcase: Gherkin feature files, no step definitions, against the ReqRes demo API</description>
+  <url>https://github.com/acbharath14/karate-scaffold</url>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <!-- Karate 1.5.x moved to the io.karatelabs group. The old
+         com.intuit.karate group stops at 1.4.1. 1.5.0+ needs Java 17. -->
+    <karate.version>1.5.2</karate.version>
+    <!-- Karate 1.5.2 was built against JUnit 5.11.4 (its parent POM pins
+         junit5.version 5.11.4). Pinning 5.12.x here mixes platform jars
+         (commons 1.11.4 from Karate with engine/launcher 1.12.2) and the
+         run fails before any test starts. Verified in the sandbox. -->
+    <junit.version>5.11.4</junit.version>
+    <surefire.version>3.2.5</surefire.version>
+    <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
+  </properties>
+
+  <dependencies>
+    <!-- Karate JUnit 5 runner (brings karate-core, JUnit 5, GraalJS) -->
+    <dependency>
+      <groupId>io.karatelabs</groupId>
+      <artifactId>karate-junit5</artifactId>
+      <version>${karate.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- JUnit 5 -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <version>1.11.4</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <!-- karate-config.js lives in src/test/java (the Karate convention)
+         but Maven only copies .java files from source dirs. This makes
+         src/test/java a test resource dir (excluding .java) so the config
+         lands on the test classpath. Without it, `baseUrl` is undefined
+         and every Background step fails. -->
+    <testResources>
+      <testResource>
+        <directory>src/test/java</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <source>17</source>
+          <target>17</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!-- Preflight runs automatically inside `mvn test`. It is split by OS
+       so Windows is never asked to run a shell script: the Unix profile
+       runs preflight.sh, the Windows profile runs preflight.ps1.
+       Skip either one with: mvn test -Dpreflight.skip=true -->
+  <profiles>
+    <profile>
+      <id>preflight-unix</id>
+      <activation>
+        <os><family>!windows</family></os>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>${exec-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>preflight</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <skip>${preflight.skip}</skip>
+                  <executable>bash</executable>
+                  <arguments>
+                    <argument>${project.basedir}/scripts/preflight.sh</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>preflight-windows</id>
+      <activation>
+        <os><family>windows</family></os>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>${exec-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>preflight</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <skip>${preflight.skip}</skip>
+                  <executable>powershell</executable>
+                  <arguments>
+                    <argument>-ExecutionPolicy</argument>
+                    <argument>Bypass</argument>
+                    <argument>-File</argument>
+                    <argument>${project.basedir}/scripts/preflight.ps1</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
