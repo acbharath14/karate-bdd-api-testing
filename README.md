@@ -32,8 +32,8 @@ No browser is needed. This repo tests an HTTP API, not a web page.
 ## Quickstart
 
 ```bash
-git clone <your-repo-url>
-cd <repo-name>
+git clone https://github.com/acbharath14/karate-bdd-api-testing.git
+cd karate-bdd-api-testing
 mvn test
 ```
 
@@ -52,7 +52,6 @@ If preflight reports something missing, it either installs it (MacPorts on macOS
 | `scripts/preflight.sh` | Setup check for macOS and Linux. Runs automatically inside `mvn test`. |
 | `scripts/preflight.ps1` | Setup check for Windows. Runs automatically inside `mvn test`. |
 | `TESTING.md` | How to run the suite, what it covers, and how to read the reports. |
-| `.github/workflows/ci.yml` | GitHub Actions workflow. See the note at the top of that file before pushing it. |
 
 ## The feature files
 
@@ -120,4 +119,8 @@ On Windows: `$env:REQRES_API_KEY = "your-key-here"; mvn test`. The key is read f
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs `mvn test` on every push and pull request to main, and uploads the Karate HTML report and the Surefire reports as artifacts (kept 7 days). Read the note at the top of that file: the workflow file goes through the GitHub web UI, not through an API push.
+CI is not wired up yet: there is no workflow file in this repo. Workflow
+files cannot be pushed through the GitHub API, so the workflow is added
+through the GitHub web UI (Actions → New workflow → "set up a workflow
+yourself", commit as `.github/workflows/ci.yml`). Once added, it runs
+`mvn test` on every push and pull request to main.
